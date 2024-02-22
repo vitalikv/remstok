@@ -2,10 +2,9 @@ import path from 'path';
 import webpack from 'webpack';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import HtmlWebPackPlugin from 'html-webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import type { Configuration as DevServerConfiguration } from 'webpack-dev-server';
-
-// const CopyPlugin = require('copy-webpack-plugin');
 
 type Mode = 'development' | 'production';
 interface EnvVariables {
@@ -30,9 +29,9 @@ export default (env: EnvVariables) => {
         favicon: path.resolve(__dirname, './src/assets/favicon/favicon.ico'),
       }),
       new MiniCssExtractPlugin({ filename: 'style.[contenthash].css' }),
-      // new CopyPlugin({
-      //   patterns: [{ from: './src/img', to: './img' }],
-      // }),
+      new CopyPlugin({
+        patterns: [{ from: path.resolve(__dirname, './src/assets'), to: path.resolve(__dirname, './public/assets') }],
+      }),
     ],
     module: {
       rules: [
