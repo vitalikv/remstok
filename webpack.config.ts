@@ -1,10 +1,21 @@
-const path = require('path');
-const HtmlWebPackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
+import path from 'path';
+import webpack from 'webpack';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import HtmlWebPackPlugin from 'html-webpack-plugin';
+//import 'webpack-dev-server';
+import type { Configuration as DevServerConfiguration } from 'webpack-dev-server';
 
-module.exports = (env) => {
-  return {
+// const CopyPlugin = require('copy-webpack-plugin');
+
+type Mode = 'development' | 'production';
+interface EnvVariables {
+  mode: Mode;
+}
+
+export default (env: EnvVariables) => {
+  const isDev = env.mode === 'development';
+
+  const config: webpack.Configuration = {
     mode: env.mode ?? 'development',
     entry: './src/index.ts',
     output: {
@@ -24,8 +35,8 @@ module.exports = (env) => {
     module: {
       rules: [
         {
-          test: /\.css$/i,
-          use: ['style-loader', 'css-loader'],
+          test: /\.s[ac]ss$/i,
+          use: ['style-loader', 'css-loader', 'sass-loader'],
         },
         {
           test: /\.tsx?$/,
@@ -40,8 +51,11 @@ module.exports = (env) => {
     optimization: {
       splitChunks: { chunks: 'all' },
     },
+    devtool: isDev ? 'inline-source-map' : false,
     devServer: {
       port: 5210,
     },
   };
+
+  return config;
 };
