@@ -2,7 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import HtmlWebPackPlugin from 'html-webpack-plugin';
-//import 'webpack-dev-server';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import type { Configuration as DevServerConfiguration } from 'webpack-dev-server';
 
 // const CopyPlugin = require('copy-webpack-plugin');
@@ -28,6 +28,7 @@ export default (env: EnvVariables) => {
         template: path.resolve(__dirname, './src/template.html'),
         filename: 'index.html',
       }),
+      new MiniCssExtractPlugin({ filename: 'style.[contenthash].css' }),
       // new CopyPlugin({
       //   patterns: [{ from: './src/img', to: './img' }],
       // }),
@@ -36,7 +37,11 @@ export default (env: EnvVariables) => {
       rules: [
         {
           test: /\.s[ac]ss$/i,
-          use: ['style-loader', 'css-loader', 'sass-loader'],
+          use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        },
+        {
+          test: /\.(png|svg|jpg|jpeg|gif)$/i,
+          type: 'asset/resource',
         },
         {
           test: /\.tsx?$/,

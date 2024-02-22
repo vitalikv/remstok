@@ -3,9 +3,13 @@ body {
   margin: 0;
   padding: 0;
 }
-#viewerContainer {
-  overflow: auto;
-  position: absolute;
-  width: 100%;
-  height: 100%;
+.test {
+  width: 100px;
+  height: 100px;
+  background: #318b37;
+
+  .svg {
+    background: #fff;
+    border: rgb(207, 19, 19);
+  }
 }
