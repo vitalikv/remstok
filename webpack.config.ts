@@ -27,6 +27,7 @@ export default (env: EnvVariables) => {
       new HtmlWebPackPlugin({
         template: path.resolve(__dirname, './src/template.html'),
         filename: 'index.html',
+        favicon: path.resolve(__dirname, './src/assets/favicon/favicon.ico'),
       }),
       new MiniCssExtractPlugin({ filename: 'style.[contenthash].css' }),
       // new CopyPlugin({
