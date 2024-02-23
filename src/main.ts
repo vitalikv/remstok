@@ -2,92 +2,13 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 //import { CSG } from 'three-csg-ts';
 
+import { MyRender } from './core/myRender';
+import { MyScene } from './editor/myScene';
+
 let renderer, camera, scene;
 let controls;
 
-class Door {
-  constructor(scene, position, reflection) {
-    const door = new THREE.Mesh(this.createGeometry(), this.createMaterial());
-
-    door.castShadow = true;
-    door.receiveShadow = true;
-    //this.csg(door);
-    if (reflection) this.setReflection(door.material);
-    door.position.copy(position);
-    scene.add(door);
-  }
-
-  createGeometry() {
-    const height = 1.9;
-    const arr = [new THREE.Vector2(-0.45, 0.05), new THREE.Vector2(-0.45, -0.05), new THREE.Vector2(0.45, -0.05), new THREE.Vector2(0.45, 0.05)];
-    const shape = new THREE.Shape(arr);
-    const geometry = new THREE.ExtrudeGeometry(shape, { bevelEnabled: false, depth: height });
-    geometry.rotateX(-Math.PI / 2);
-
-    return geometry;
-  }
-
-  csg(door) {
-    const side = [0.08, -0.08];
-
-    // for (let i = 0; i < side.length; i++) {
-    //   const box = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.7, 0.1), new THREE.MeshStandardMaterial({ color: 0x0000ff }));
-
-    //   box.position.y = 1.7 / 2 + 0.1;
-    //   box.position.z = side[i];
-
-    //   box.updateMatrix();
-    //   door.updateMatrix();
-
-    //   const subRes = CSG.subtract(door, box);
-    //   door.geometry.dispose();
-    //   door.geometry = subRes.geometry;
-    // }
-  }
-
-  createMaterial() {
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-    this.createTexture(material);
-
-    return material;
-  }
-
-  createTexture(material) {
-    new THREE.TextureLoader().load('assets/images/1.jpg', function (image) {
-      const texture = image;
-      material.color = new THREE.Color(0xffffff);
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-      texture.repeat.x = 1.0;
-      texture.repeat.y = 1.0;
-      texture.needsUpdate = true;
-
-      material.map = texture;
-      material.needsUpdate = true;
-    });
-  }
-
-  setReflection(material) {
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    pmremGenerator.compileEquirectangularShader();
-
-    const cubeCamera = new THREE.CubeCamera(0.01, 10, new THREE.WebGLCubeRenderTarget(512, { encoding: THREE.sRGBEncoding }));
-
-    cubeCamera.position.copy(new THREE.Vector3(0, 1, 0));
-    cubeCamera.update(renderer, scene);
-
-    const envMap = pmremGenerator.fromEquirectangular(cubeCamera.renderTarget.texture).texture;
-    material.metalness = 0.7;
-    material.roughness = 0.0;
-    material.envMap = envMap;
-    material.needsUpdate = true;
-
-    envMap.dispose();
-    cubeCamera.renderTarget.texture.dispose();
-
-    pmremGenerator.dispose();
-  }
-}
+export const myRender = new MyRender();
 
 init();
 render();
@@ -119,42 +40,25 @@ function init() {
   shadowCam.top = 30;
   shadowCam.right = 45;
 
-  const size = 30;
-  const divisions = 30;
-
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-  plane.position.x = -0.001;
-  plane.rotation.set(Math.PI / 2, Math.PI, 0);
-  plane.castShadow = true;
-  plane.receiveShadow = true;
-  scene.add(plane);
-
-  const gridHelper = new THREE.GridHelper(size, divisions);
-  scene.add(gridHelper);
-
-  scene.add(light);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x223344, 0.4));
+  //scene.add(light);
+  scene.add(new THREE.AmbientLight(0xffffff, 1));
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
   camera.position.set(5, 5, -5);
   camera.far = 1000;
   camera.updateProjectionMatrix();
 
+  myRender.init({ renderer, scene, camera });
+
   controls = new OrbitControls(camera, renderer.domElement);
 
-  new Door(scene, new THREE.Vector3(-1.5, 0, 0), false);
-  new Door(scene, new THREE.Vector3(1.5, 0, 0), true);
+  const s1 = new MyScene(renderer, scene);
+  const s2 = new MyScene(renderer, scene);
 
-  window.addEventListener(
-    'resize',
-    function () {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    },
-    false
-  );
+  s1.addPlane();
+  s1.init(new THREE.Vector3(-0.0, 0, -1.5 / 2), false, Math.PI / 2);
+  s2.init(new THREE.Vector3(1.5, 0, 1.5 / 2), false);
+  s2.init(new THREE.Vector3(1.5 * 2, 0, -1.5 / 2), false, Math.PI / 2);
 }
 
 function render() {
@@ -162,5 +66,6 @@ function render() {
 
   controls.update();
 
-  renderer.render(scene, camera);
+  //renderer.render(scene, camera);
+  myRender.render();
 }
