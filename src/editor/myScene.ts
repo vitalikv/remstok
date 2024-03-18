@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { MeshPostProcessingMaterial } from 'three/examples/jsm/materials/MeshPostProcessingMaterial.js';
 
-import { myRender } from '../main';
+import { myRender } from '@src/main';
 
 export class MyScene {
   renderer;

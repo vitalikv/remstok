@@ -52,6 +52,9 @@ export default (env: EnvVariables) => {
     },
     resolve: {
       extensions: ['.tsx', '.ts', '.js'],
+      alias: {
+        '@src': path.resolve(__dirname, './src'),
+      },
     },
     optimization: {
       splitChunks: { chunks: 'all' },
